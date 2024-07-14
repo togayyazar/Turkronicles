@@ -83,3 +83,19 @@ class Exists(Operation):
     def on_synchronic(self, c: Corpus):
         data: Vocabulary = c.data
         return data.exist(self.word)
+
+
+class Frequency(Operation):
+    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
+        self.time_range = time_range
+        self.word = word
+
+    def on_diachronic(self, d: DiachronicCorpus):
+        time_series = {}
+        for c in d.corpus_iterator(self.time_range):
+            time_series[(c.beginning, c.end)] += c.data.frequency(self.word)
+
+        return sum(time_series.values()),time_series
+
+    def on_synchronic(self, c: Corpus):
+        return c.data.frequency(self.word)

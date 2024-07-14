@@ -130,5 +130,13 @@ class DiachronicCorpus(Container):
     def perform(self, operation: 'Operation'):
         return operation.on_diachronic(self)
 
+    def corpus_iterator(self, time_range: Union[slice, tuple]):
+        queue: list = self[time_range]
+        for cont in iter(queue):
+            if isinstance(cont, Corpus):
+                yield cont
+            if isinstance(cont, DiachronicCorpus):
+                queue.extend(cont.corpora)
+
     def __repr__(self):
         return f'DiachronicCorpus <{self.name},{self.beginning}, {self.end}>'
