@@ -16,7 +16,7 @@ class Corpus(Container, Data):
         self.source_path = source_path
         self._beginning = beginning
         self._end = end
-        self.data: Union[Data, VData, Iterable[Data], None] = data
+        self.data = data
 
     def __eq__(self, other: "Corpus"):
         if not isinstance(other, Corpus):
@@ -38,7 +38,7 @@ class Corpus(Container, Data):
         return corpus
 
     def perform(self, operation: 'Operation'):
-        operation.on_synchronic(self)
+        return operation.on_synchronic(self)
 
 
 class DiachronicCorpus(Container):
@@ -75,6 +75,8 @@ class DiachronicCorpus(Container):
         self._occupied.append(time_range)
         self.corpora.append(c)
         self.corpora = sorted(self.corpora, key=lambda x: x.beginning)
+        self._beginning = self._occupied[0][0]
+        self._end = self._occupied[-1][1]
 
     def remove(self, c: Container) -> None:
         if c in self.corpora:
@@ -126,7 +128,7 @@ class DiachronicCorpus(Container):
         return corpus
 
     def perform(self, operation: 'Operation'):
-        operation.on_diachronic(self)
+        return operation.on_diachronic(self)
 
     def __repr__(self):
         return f'DiachronicCorpus <{self.name},{self.beginning}, {self.end}>'
