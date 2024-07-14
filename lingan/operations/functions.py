@@ -1,9 +1,9 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 from scipy.linalg import orthogonal_procrustes
 
 from lingan.containers import DiachronicCorpus, Corpus
-from lingan.models import Embeddings
+from lingan.models import Embeddings, Vocabulary
 from lingan.operations.definitions import Operation
 
 
@@ -49,7 +49,7 @@ class AlignEmbeddings(Operation):
     def on_diachronic(self, d: DiachronicCorpus):
         corpus_target: Corpus = d[self.target_period]
         E_target: Embeddings = corpus_target.data
-        R = AlignEmbeddings(self.base_period,self.target_period)
+        R = AlignEmbeddings(self.base_period, self.target_period)
         aligned_embeddings = E_target.W @ R
         if self.in_place:
             E_target.W = aligned_embeddings
@@ -63,5 +63,23 @@ class AlignEmbeddings(Operation):
     def set_base_period(self, base: Tuple[str, str]):
         self.base_period = base
 
-class Exists(Operation):
 
+class Exists(Operation):
+    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
+        self.time_range = time_range
+        self.word = word
+
+    def on_diachronic(self, d: DiachronicCorpus):
+        queue: list = d[self.time_range]
+        for cont in iter(queue):
+            if isinstance(cont, Corpus):
+                if cont.data.exist(self.word):
+                    return True
+            else:
+                queue.extend(cont.corpora)
+
+        return False
+
+    def on_synchronic(self, c: Corpus):
+        data: Vocabulary = c.data
+        return data.exist(self.word)

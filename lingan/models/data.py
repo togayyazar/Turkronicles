@@ -1,9 +1,7 @@
 import pickle
 from typing import Dict, Iterable, Optional, Union, Tuple
 import numpy as np
-import json
 
-from ..protocols.definitions import JSONSerializable
 from .definitions import Data, VData
 
 
