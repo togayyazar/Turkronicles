@@ -1,6 +1,5 @@
 from typing import Tuple, Union
 from scipy.linalg import orthogonal_procrustes
-
 from lingan.containers import DiachronicCorpus, Corpus
 from lingan.models import Embeddings, Vocabulary
 from lingan.operations.definitions import Operation
@@ -65,65 +64,6 @@ class AlignEmbeddings(Operation):
 
     def set_base_period(self, base: Tuple[str, str]):
         self.base_period = base
-
-    def on_synchronic(self, c: Corpus):
-        pass
-
-
-class Exists(Operation):
-    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
-        self.time_range = time_range
-        self.word = word
-
-    def on_diachronic(self, d: DiachronicCorpus):
-        queue: list = d[self.time_range]
-        for cont in iter(queue):
-            if isinstance(cont, Corpus):
-                if cont.data.exist(self.word):
-                    return True
-            else:
-                queue.extend(cont.corpora)
-
-        return False
-
-    def on_synchronic(self, c: Corpus):
-        data: Vocabulary = c.data
-        return data.exist(self.word)
-
-
-class Frequency(Operation):
-    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
-        self.time_range = time_range
-        self.word = word
-
-    def on_diachronic(self, d: DiachronicCorpus):
-        time_series = {}
-        for c in d.corpus_iterator(self.time_range):
-            time_series[(c.beginning, c.end)] += c.data.frequency(self.word)
-
-        return sum(time_series.values()), time_series
-
-    def on_synchronic(self, c: Corpus):
-        return c.data.frequency(self.word)
-
-
-class MergeVocabulary(Operation):
-
-    def __init__(self, base_period: Union[Tuple[int, int], int], target_period: Union[Tuple[int, int], int]):
-        self.base_period = base_period
-        self.target_period = target_period
-
-    def on_diachronic(self, d: DiachronicCorpus):
-        v_base: Vocabulary = d[self.base_period].data
-        v_target: Vocabulary = d[self.target_period].data
-        union_vocab = set(v_base.idx2word).union(v_target.idx2word)
-        new_vocab = Vocabulary()
-
-        for word in union_vocab:
-            freq = v_base.frequency(word) + v_target.frequency(word)
-            new_vocab.add(word, freq)
-
-        return new_vocab
 
     def on_synchronic(self, c: Corpus):
         pass
