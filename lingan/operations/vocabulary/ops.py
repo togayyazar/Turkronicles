@@ -29,16 +29,23 @@ class Exists(Operation):
 
 
 class Frequency(Operation):
-    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
+    def __init__(self, word: str, time_range: Union[slice, Tuple] = None, normalized=False):
         self.time_range = time_range
         self.word = word
+        self.normalized = normalized
 
     def on_diachronic(self, d: DiachronicCorpus):
-        time_series = {}
-        for c in d.corpus_iterator(self.time_range):
-            time_series[(c.beginning, c.end)] += c.data.frequency(self.word)
+        corpora = [c for c in d.corpus_iterator(self.time_range)]
+        time_series = [self.on_synchronic(c) for c in corpora]
 
-        return sum(time_series.values()), time_series
+        return time_series, list(map(lambda x: (x.beginning, x.end), corpora))
+
+    def on_synchronic(self, c: Corpus):
+        data: Vocabulary = c.data
+        if self.normalized:
+            return data.frequency(self.word) / sum(data.frequency_dist.values())
+        return data.frequency(self.word)
+
 
 
 class MergeVocabulary(Operation):

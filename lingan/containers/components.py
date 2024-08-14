@@ -109,9 +109,11 @@ class DiachronicCorpus(Container):
             end = index[1]
 
             c = None
-            for _c in self.corpora:
-                if _c.beginning == beginning and _c.end == end:
-                    c = _c
+            queue: list = self.corpora
+            for cont in iter(queue):
+                if isinstance(cont, Corpus):
+                    if beginning == cont.beginning and end == cont.end:
+                        return cont
             if not c:
                 raise ValueError("Corpus cannot be found")
 

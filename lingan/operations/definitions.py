@@ -1,5 +1,4 @@
 from typing import Protocol
-from abc import abstractmethod
 from ..containers.components import DiachronicCorpus, Corpus
 
 

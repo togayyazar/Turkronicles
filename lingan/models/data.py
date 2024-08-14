@@ -165,5 +165,6 @@ class Embeddings(VData):
         else:
             return W
 
-    class Ngrams(VData):
-        pass
+
+class Ngrams(VData):
+    pass

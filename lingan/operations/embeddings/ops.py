@@ -1,9 +1,10 @@
 from typing import Tuple, Union
 from scipy.linalg import orthogonal_procrustes
-
 from lingan.containers import DiachronicCorpus, Corpus
 from lingan.models import Embeddings, Vocabulary
 from lingan.operations.definitions import Operation
+from lingan.math.functions import cosine_similarity
+import numpy as np
 
 
 class AlignmentMatrix(Operation):
@@ -70,60 +71,62 @@ class AlignEmbeddings(Operation):
         pass
 
 
-class Exists(Operation):
-    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
-        self.time_range = time_range
+class MostSimilar(Operation):
+    def __init__(self, word: str, k: int, target_period: Union[Tuple[int, int]] = None,
+                 time_range: Union[slice, Tuple] = None):
         self.word = word
-
-    def on_diachronic(self, d: DiachronicCorpus):
-        queue: list = d[self.time_range]
-        for cont in iter(queue):
-            if isinstance(cont, Corpus):
-                if cont.data.exist(self.word):
-                    return True
-            else:
-                queue.extend(cont.corpora)
-
-        return False
-
-    def on_synchronic(self, c: Corpus):
-        data: Vocabulary = c.data
-        return data.exist(self.word)
-
-
-class Frequency(Operation):
-    def __init__(self, word: str, time_range: Union[slice, Tuple] = None):
-        self.time_range = time_range
-        self.word = word
-
-    def on_diachronic(self, d: DiachronicCorpus):
-        time_series = {}
-        for c in d.corpus_iterator(self.time_range):
-            time_series[(c.beginning, c.end)] += c.data.frequency(self.word)
-
-        return sum(time_series.values()), time_series
-
-    def on_synchronic(self, c: Corpus):
-        return c.data.frequency(self.word)
-
-
-class MergeVocabulary(Operation):
-
-    def __init__(self, base_period: Union[Tuple[int, int], int], target_period: Union[Tuple[int, int], int]):
-        self.base_period = base_period
+        self.k = k
         self.target_period = target_period
+        self.time_range = time_range
 
-    def on_diachronic(self, d: DiachronicCorpus):
-        v_base: Vocabulary = d[self.base_period].data
-        v_target: Vocabulary = d[self.target_period].data
-        union_vocab = set(v_base.idx2word).union(v_target.idx2word)
-        new_vocab = Vocabulary()
+    def on_diachronic(self, d: DiachronicCorpus) -> Tuple[list[str], list[float], list[Tuple[int, int]]]:
+        if self.target_period:
+            corpus = d[self.target_period]
+            return self.on_synchronic(corpus)
 
-        for word in union_vocab:
-            freq = v_base.frequency(word) + v_target.frequency(word)
-            new_vocab.add(word, freq)
+        words_across_time = []
+        similarities = []
+        corpora = [c for c in d.corpus_iterator(self.time_range)]
+        for c in corpora:
+            similar_words, sims = self.on_synchronic(c)
+            words_across_time.append(similar_words)
+            similarities.append(sims)
 
-        return new_vocab
+        return words_across_time, similarities, list(map(lambda c: (c.beginning, c.end), corpora))
 
     def on_synchronic(self, c: Corpus):
-        pass
+        embeddings: Embeddings = c.data
+        word_vector = embeddings.vector(self.word)
+        affinity_matrix = cosine_similarity(embeddings.W, word_vector)
+        affinity_matrix[embeddings.vocabulary.index(self.word), 0] = -1
+        indices = np.argsort(affinity_matrix[:, 0])[::-1][:self.k]
+        similar_words = list(map(embeddings.vocabulary.word, indices))
+        return similar_words, affinity_matrix[:, 0][indices].tolist()
+
+
+class Similarity(Operation):
+    def __init__(self, u: str, v: str, target_period: Union[Tuple[int, int]] = None,
+                 time_range: Union[slice, Tuple] = None):
+        self.u = u
+        self.v = v
+        self.target_period = target_period
+        self.time_range = time_range
+
+    def on_diachronic(self, d: DiachronicCorpus):
+        if self.target_period:
+            corpus = d[self.target_period]
+            return self.on_synchronic(corpus)
+
+        similarities = []
+        corpora = [c for c in d.corpus_iterator(self.time_range)]
+        for c in corpora:
+            similar_words, sims = self.on_synchronic(c)
+            similarities.append(sims)
+
+        return similarities, list(map(lambda c: (c.beginning, c.end), corpora))
+
+    def on_synchronic(self, c: Corpus):
+        embeddings: Embeddings = c.data
+        u_vector = embeddings.vector(self.u)
+        v_vector = embeddings.vector(self.v)
+        return cosine_similarity(u_vector, v_vector)

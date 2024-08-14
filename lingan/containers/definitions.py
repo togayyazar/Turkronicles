@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import Protocol, Optional, List, Dict
 
 
@@ -40,3 +41,7 @@ class Container(Protocol):
     @classmethod
     def is_valid_range(cls, beginning: int, end: int) -> bool:
         return beginning <= end
+
+    @abstractmethod
+    def perform(self,operation: 'Operation'):
+        ...
