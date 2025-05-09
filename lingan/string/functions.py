@@ -1,21 +1,25 @@
-from typing import Union, Dict, Iterable
+from typing import Union, Dict, List
 import numpy as np
+from typing_extensions import Tuple
 
 from lingan.math.functions import jaccard_similarity
-
-'''
-:param source: str Source string
-:param target: str Target string
-:param d_cost: float deletion cost
-:param i_cost: float insertion cost
-:param s_cost: Union[np.array, float] substitution cost; either a cost matrix or a scalar
-:param alphabet2idx: Dict[str, int] mapping from character to index. Can only be used when s_cost is a cost matrix
-:return: float levenshtein distance
-'''
+from itertools import product
 
 
 def levenshtein_distance(source: str, target: str, d_cost: float = 1.0, i_cost: float = 1.0,
-                         s_cost: Union[np.array, float] = 2.0, alphabet2idx: Dict[str, int] = None) -> float:
+                         s_cost: Union[np.array, float] = 2.0, alphabet2idx: Dict[str, int] = None,
+                         align=False) -> Union[float, Tuple[float, List]]:
+    """
+    :param source: str Source string
+    :param target: str Target string
+    :param d_cost: float deletion cost
+    :param i_cost: float insertion cost
+    :param s_cost: Union[np.array, float] substitution cost; either a cost matrix or a scalar
+    :param alphabet2idx: Dict[str, int] mapping from character to index. Can only be used when s_cost is a cost matrix
+    :param align: bool whether to return aligned strings
+    :return: float levenshtein distance
+    """
+
     if isinstance(s_cost, float):
         alphabet = sorted(list(set(source).union(set(target))))
         alphabet2idx = {c: i for i, c in enumerate(alphabet)}
@@ -28,8 +32,18 @@ def levenshtein_distance(source: str, target: str, d_cost: float = 1.0, i_cost: 
     n = len(source)
     m = len(target)
     D = np.zeros((n + 1, m + 1), dtype=np.float32)
+    trace = dict.fromkeys(product(range(n + 1), range(m + 1)))
+    for key in trace.keys():
+        trace[key] = []
+
     D[1:, 0] = np.arange(d_cost, n * d_cost + d_cost, d_cost)
     D[0, 1:] = np.arange(i_cost, m * i_cost + i_cost, i_cost)
+
+    for i in range(1, n + 1):
+        trace[(i, 0)].append('d')
+
+    for j in range(1, m + 1):
+        trace[(0, j)].append('i')
 
     for i in range(1, n + 1):
         for j in range(1, m + 1):
@@ -38,6 +52,52 @@ def levenshtein_distance(source: str, target: str, d_cost: float = 1.0, i_cost: 
                 D[i, j - 1] + i_cost,
                 D[i - 1, j - 1] + s_cost_matrix[alphabet2idx[source[i - 1]], alphabet2idx[target[j - 1]]],
             )
+
+            if D[i - 1, j] + d_cost <= D[i, j]:
+                trace[(i, j)].append('d')
+            if D[i, j - 1] + i_cost <= D[i, j]:
+                trace[(i, j)].append('i')
+            if D[i - 1, j - 1] + s_cost_matrix[alphabet2idx[source[i - 1]], alphabet2idx[target[j - 1]]] <= D[i, j]:
+                trace[(i, j)].append('s')
+
+    if align:
+        i, j = n, m
+        alignment_ops = []
+        while i > 0 or j > 0:
+            if 's' in trace[(i, j)]:
+                alignment_ops.append('s')
+                i -= 1
+                j -= 1
+            elif 'i' in trace[(i, j)]:
+                alignment_ops.append('i')
+                j -= 1
+            else:
+                alignment_ops.append('d')
+                i -= 1
+        alignment_ops.reverse()
+
+        src_a = []
+        target_a = []
+        i, j = 0, 0
+        for op in alignment_ops:
+            if op == 'd':
+                src_a.append(source[i])
+                target_a.append('*')
+                i += 1
+            elif op == 's':
+                src_a.append(source[i])
+                target_a.append(target[j])
+                i += 1
+                j += 1
+            else:
+                src_a.append('*')
+                target_a.append(target[j])
+                j += 1
+
+
+
+        alignment_string = ' '.join(src_a) + '\n' + ' '.join(len(alignment_ops) * ['|']) + '\n' + ' '.join(target_a)
+        return D[n, m], alignment_string, alignment_ops
 
     return D[n, m]
 

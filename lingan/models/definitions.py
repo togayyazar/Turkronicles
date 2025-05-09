@@ -5,19 +5,14 @@ from typing import Protocol
 DATA_TYPES = {}
 
 
-class DataMeta(type):
+class DataMeta(type(Protocol)):
     def __new__(cls, clsname, bases, attrs):
         DATA_TYPES[clsname] = cls
-
         return super().__new__(cls, clsname, bases, attrs)
 
 
-class DataProtocol(type(Protocol), type(DataMeta)):
-    pass
-
-
-class Data(Protocol, metaclass=DataProtocol):
-    value: object
+class Data(Protocol, metaclass=DataMeta):
+    ...
 
 
 class VData(Data, Protocol):

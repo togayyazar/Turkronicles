@@ -1,15 +1,17 @@
 from abc import abstractmethod
 from typing import Protocol, Optional, List, Dict
 
+from lingan.models import Data
 
-class Container(Protocol):
+
+class Container[T:Data](Protocol):
     name: Optional[str]
     _beginning: Optional[int]
     _end: Optional[int]
     lang: Optional[str]
 
-    def period(self) -> [tuple[int, int]]:
-        return [self.beginning, self.end]
+    def period(self) -> tuple[int, int]:
+        return self.beginning, self.end
 
     @classmethod
     def is_diachronic(cls, c: "Container") -> bool:
@@ -22,9 +24,9 @@ class Container(Protocol):
     @beginning.setter
     def beginning(self, value: int):
         if self.end:
-            if value > self.end:
+            if value > self._end:
                 raise ValueError("beginning cannot be greater than end")
-        self.beginning = value
+        self._beginning = value
 
     @property
     def end(self):
@@ -32,16 +34,16 @@ class Container(Protocol):
 
     @end.setter
     def end(self, value: int):
-        if self.beginning:
-            if value < self.beginning:
+        if self._beginning:
+            if value < self._beginning:
                 raise ValueError("end cannot be less than beginning")
 
-        self.end = value
+        self._end = value
 
     @classmethod
     def is_valid_range(cls, beginning: int, end: int) -> bool:
         return beginning <= end
 
     @abstractmethod
-    def perform(self,operation: 'Operation'):
+    def perform(self, operation: 'Operation'):
         ...

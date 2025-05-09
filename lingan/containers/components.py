@@ -5,18 +5,17 @@ from lingan.containers.definitions import Container
 from lingan.models.definitions import Data, VData
 
 
-class Corpus(Container, Data):
+class Corpus[T: Data](Container, Data):
 
-    def __init__(self, source_path: Optional[str] = None, name: Optional[str] = None, lang: Optional[str] = None,
-                 beginning: Optional[str] = None, end: Optional[str] = None,
+    def __init__(self, name: Optional[str] = None, lang: Optional[str] = None,
+                 beginning: Optional[int] = None, end: Optional[int] = None,
                  data: Union[Data, Iterable[Data], None] = None):
         self.name = name
 
         self.lang = lang
-        self.source_path = source_path
         self._beginning = beginning
         self._end = end
-        self.data = data
+        self.data: T = data
 
     def __eq__(self, other: "Corpus"):
         if not isinstance(other, Corpus):
@@ -29,7 +28,7 @@ class Corpus(Container, Data):
             pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     def __repr__(self):
-        return f'Corpus <{self.name},{self.beginning}, {self.end}>'
+        return f'Corpus:{self.name} <{self.beginning}, {self.end}>'
 
     @classmethod
     def load(cls, path: str) -> "Corpus":
@@ -41,11 +40,11 @@ class Corpus(Container, Data):
         return operation.on_synchronic(self)
 
 
-class DiachronicCorpus(Container):
+class DiachronicCorpus[T: Data](Container[T]):
 
     def __init__(self, name: Optional[str] = None, lang: Optional[str] = None,
                  beginning: Optional[str] = None, end: Optional[str] = None,
-                 corpora: Optional[List[Container]] = None):
+                 corpora: Optional[List[Container[T]]] = None):
 
         self.name = name
         self.lang = lang
@@ -54,7 +53,7 @@ class DiachronicCorpus(Container):
         self._occupied: List[Tuple[int, int]] = list()
 
         if not corpora:
-            corpora = list()
+            corpora: List[Container[T]] = list()
 
         self.corpora = list()
         for c in corpora:
@@ -83,14 +82,14 @@ class DiachronicCorpus(Container):
             pass
 
     @overload
-    def __getitem__(self, index: Tuple[str, str]):
+    def __getitem__(self, index: Tuple[int, int]) -> Corpus[T]:
         ...
 
     @overload
-    def __getitem__(self, index: slice):
+    def __getitem__(self, index: slice) -> Union[Corpus[T], List[Container[T]], None]:
         ...
 
-    def __getitem__(self, index) -> Union[Corpus, List[Container]]:
+    def __getitem__(self, index) -> Union[Corpus[T], List[Container[T]], None]:
         if isinstance(index, slice):
             beginning = index.start
             end = index.stop
@@ -132,7 +131,9 @@ class DiachronicCorpus(Container):
     def perform(self, operation: 'Operation'):
         return operation.on_diachronic(self)
 
-    def corpus_iterator(self, time_range: slice) -> Corpus:
+    def corpus_iterator(self, time_range: slice) -> Iterable[Corpus[T]]:
+        if not time_range:
+            time_range = slice(None, None, None)
         beginning = time_range.start
         end = time_range.stop
         if time_range.start is None:
@@ -148,6 +149,13 @@ class DiachronicCorpus(Container):
             if isinstance(cont, DiachronicCorpus):
                 queue.extend(cont.corpora)
 
+    def get_corpus(self, name):
+        corpora = self[:]
+        for c in corpora:
+            if c.name == name:
+                return c
 
-def __repr__(self):
-    return f'DiachronicCorpus <{self.name},{self.beginning}, {self.end}>'
+        return None
+
+    def __repr__(self):
+        return f'DiachronicCorpus <{self.name},{self.beginning}, {self.end}>'

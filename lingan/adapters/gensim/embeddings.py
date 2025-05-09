@@ -1,13 +1,12 @@
-from lingan.adapters.protocols import Adapter
+from .protocols import Adapter
 from gensim.models import Word2Vec, FastText
 
 from lingan.models import Embeddings, Vocabulary
 
 
-class GensimAdapter(Adapter):
+class GensimEmbeddings(Adapter):
 
-    def __init__(self, model_path=None, model_type: str = 'Word2Vec'):
-        self.model_path = model_path
+    def __init__(self, model_type: str = 'Word2Vec'):
         self.model_type = model_type
 
     def _load_model(self, path: str):
@@ -20,8 +19,6 @@ class GensimAdapter(Adapter):
         return model
 
     def load(self, path: str = None):
-        if not path:
-            path = self.model_path
 
         model = self._load_model(path)
 

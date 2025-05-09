@@ -1,8 +1,8 @@
 from .ops import *
 
 __all__ = [
-    'AlignEmbeddings',
-    'AlignmentMatrix',
+    'ProcrustesAlignment',
+    'OrthogonalAlignmentMatrix',
     'MostSimilar',
     'Similarity'
 ]
