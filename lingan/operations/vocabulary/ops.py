@@ -384,7 +384,7 @@ class ZipfsFit(Operation):
         return k / np.power(x, s)
 
     def on_diachronic(self, d: DiachronicCorpus[Vocabulary]):
-        pass
+        raise NotImplementedError('Not implemented yet!')
 
     def on_synchronic(self, c: Corpus[Vocabulary]):
         sorted_freq = sorted(c.data.frequency_dist.items(), key=lambda x: x[1], reverse=True)
@@ -396,7 +396,7 @@ class ZipfsFit(Operation):
 
         try:
             params = curve_fit(ZipfsFit.zipf_law, ranks, frequencies, p0=initial, maxfev=10000)
-            return params  # (s, A)
+            return params
         except RuntimeError:
             print("Optimization failed. Try adjusting initial parameters or input data.")
             return None

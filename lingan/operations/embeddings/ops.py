@@ -116,7 +116,7 @@ class MostSimilar(Operation):
         affinity_matrix = cosine_similarity(embeddings.W, word_vector)
         affinity_matrix[embeddings.vocabulary.index(self.word), 0] = -2
         indices = np.argsort(affinity_matrix[:, 0])[::-1][:self.k]
-        similar_words = list(map(embeddings.vocabulary.word, indices))
+        similar_words = list(map(embeddings.vocabulary.key, indices))
         return similar_words, affinity_matrix[:, 0][indices].tolist()
 
 
@@ -142,7 +142,7 @@ class AlignedMostSimilar(DiachronicOperation):
         aligned_vector = AlignedVector(self.word, self.t1, self.t2, self.time_range).on_diachronic(d)
         affinity_matrix = cosine_similarity(embeddings.W, aligned_vector)
         indices = np.argsort(affinity_matrix[:, 0])[::-1][:self.k]
-        similar_words = list(map(embeddings.vocabulary.word, indices))
+        similar_words = list(map(embeddings.vocabulary.key, indices))
         return similar_words, affinity_matrix[:, 0][indices].tolist()
 
 

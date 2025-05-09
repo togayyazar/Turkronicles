@@ -1,6 +1,5 @@
-import os
 import pickle
-from typing import Dict, Iterable, Optional, Tuple, List, Hashable
+from typing import Dict, Iterable, Optional, Tuple, List, Hashable, Sequence
 import numpy as np
 
 from .definitions import Data, VData
@@ -56,27 +55,19 @@ class Vocabulary[T:Hashable](Data):
         else:
             self.frequency_dist[key] += freq
 
-    def frequency(self, word: str):
-        if not self.exist(word):
+    def frequency(self, key: str):
+        if not self.exist(key):
             return 0
-        return self.frequency_dist[word]
+        return self.frequency_dist[key]
 
-    def index(self, word):
-        if not self.exist(word):
+    def index(self, key):
+        if not self.exist(key):
             return -1
 
-        return self.key2idx[word]
+        return self.key2idx[key]
 
-    def word(self, index):
+    def key(self, index):
         return self.idx2key[index]
-
-    def json(self):
-        j = {
-            "frequency_dist": self.frequency_dist,
-            "word2idx": self._key2idx,
-            "idx2word": self._idx2key
-        }
-        return j
 
     @classmethod
     def load(cls, path: str) -> 'Vocabulary':
@@ -188,30 +179,81 @@ class CooccurenceMatrix(Data):
         self.F[i, j] -= freq
 
 
-class NGram[T:(Hashable, Iterable)](VData):
-    def __init__(self, n: int = None, ngrams: T = None, vocabulary: Vocabulary[T] = None):
+class NGram[T:Hashable](VData):
+    def __init__(self, n: int = None, ngrams: Iterable[Sequence[T]] = None, vocabulary: Vocabulary[T] = None):
         if not n and not ngrams:
             raise ValueError("n and ngrams cannot be None at the same time!")
         if ngrams and vocabulary:
-            raise ValueError("Only one of the arguments (vocabulary and ngrams) should be provided!")
+            raise ValueError("Only one of the arguments (vocabulary or ngrams) should be provided!")
 
         if not n and ngrams:
-            n = len(ngrams[0])
+            n = len(next(iter(ngrams)))
 
         if not vocabulary:
             vocabulary = Vocabulary[T]()
 
         self.n = n
         self.vocabulary = vocabulary
+        self.collocations: dict[T, dict[T, dict]] = dict()
 
         if ngrams:
             for ngram in ngrams:
-                self.vocabulary.add(ngram)
+                self.add(ngram)
 
-    def frequency(self,):
-        ...
-    def index(self):
-        pass
+    def add(self, ngram: Sequence[T]):
+        if len(ngram) != self.n:
+            raise ValueError(f'Expected ngram length {self.n} but {len(ngram)} given')
+
+        self.vocabulary.add(ngram)
+        for i, key in enumerate(ngram):
+            if key not in self.collocations:
+                self.collocations[key] = dict()
+
+            for j, other_key in enumerate(ngram):
+                if i == j:
+                    continue
+                if other_key not in self.collocations[key]:
+                    self.collocations[key][other_key] = {'frequency': 1}
+                else:
+                    new_frequency = self.collocations[key][other_key]['frequency'] + 1
+                    self.collocations[key][other_key]['frequency'] = new_frequency
+
+    def exist(self, ngram: Sequence[T]) -> bool:
+        return self.vocabulary.exist(ngram)
+
+    def get_ngram(self, index: int) -> Sequence[T]:
+        return self.vocabulary.key(index)
+
+    def frequency(self, ngram: Sequence[T]) -> int:
+        return self.vocabulary.frequency(ngram)
+
+    def co_frequency(self, key: T, other_key: T) -> int:
+        return self.collocations[key][other_key].get('frequency', 0)
+
+    def index(self, ngram: Sequence[T]) -> int:
+        return self.vocabulary.index(ngram)
+
+    def collocates(self, key: [T]) -> List[T]:
+        return list(self.collocations[key].keys())
+
+    @classmethod
+    def load(cls, path: str) -> 'NGram':
+        with open(path, "rb") as f:
+            vocab = pickle.load(f)
+        return vocab
+
+    def save(self, path: str):
+        with open(path, "wb") as f:
+            pickle.dump(self, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def __len__(self) -> int:
+        return len(self.vocabulary)
+
+    def __iter__(self):
+        return iter(self.vocabulary)
+
+    def __repr__(self) -> str:
+        return f"NGram(n={self.n})"
 
 
 class ContextualEmbeddings(VData):
