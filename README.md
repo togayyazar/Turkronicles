@@ -1,1 +1,1 @@
-This is a linguistic analysis framework written in pure Python.
+This is a linguistic analysis framework written in Python.
