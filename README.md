@@ -1,4 +1,4 @@
-# Lingan
+# Turkronicles
 
 **Python Library for Diachronic Linguistic Analysis**
 
