@@ -1,6 +1,6 @@
 # Turkronicles
 
-**Python Library for Diachronic Linguistic Analysis**
+**Diachronic Resources for the Fast Evolving Turkish Language**
 
 ---
 
