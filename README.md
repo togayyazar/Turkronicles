@@ -2,8 +2,6 @@
 
 **Diachronic Resources for the Fast Evolving Turkish Language**
 
----
-
 ## Table of Contents
 
 - [Overview](#overview)
@@ -13,11 +11,14 @@
 - [Citation](#citation)
 - [License](#license)
 
----
+
 
 ## Overview
 
-Lingan is a Python library designed for computational exploration of diachronic corpora and temporal linguistic patterns. It provides functions and tools to analyze text data organized by time periods, offering modular components for vocabulary statistics, embeddings, and more.
+This is the repository for code and data repository used in the study Turkronicle:Diachronic Resources for the Fast Evolving Turkish Language. It provides functions and tools to analyze text data organized by time periods, offering modular components for vocabulary statistics, embeddings, and more.
+
+For accessing diachronic resources please see:
+https://zenodo.org/records/15766757
 
 ## Installation
 
