@@ -35,5 +35,5 @@ If you use the resources presented in this repository, please cite:
       eprint={2405.10133},\
       archivePrefix={arXiv},\
       primaryClass={cs.CL},\
-      url={https://arxiv.org/abs/2405.10133},\
+      url={https://arxiv.org/abs/2405.10133},
 }
