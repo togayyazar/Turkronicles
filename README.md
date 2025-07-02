@@ -28,12 +28,12 @@ Explore `lingan/examples/exps.py` and Jupyter notebooks for step-by-step tutoria
 
 If you use the resources presented in this repository, please cite:
 
-@misc{yazar2024turkroniclesdiachronicresourcesfast,
-      title={Turkronicles: Diachronic Resources for the Fast Evolving Turkish Language}, 
-      author={Togay Yazar and Mucahid Kutlu and İsa Kerem Bayırlı},
-      year={2024},
-      eprint={2405.10133},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2405.10133}, 
+@misc{yazar2024turkroniclesdiachronicresourcesfast,\
+      title={Turkronicles: Diachronic Resources for the Fast Evolving Turkish Language},\ 
+      author={Togay Yazar and Mucahid Kutlu and İsa Kerem Bayırlı},\
+      year={2024},\
+      eprint={2405.10133},\
+      archivePrefix={arXiv},\
+      primaryClass={cs.CL},\
+      url={https://arxiv.org/abs/2405.10133},\
 }
