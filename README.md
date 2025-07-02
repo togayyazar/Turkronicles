@@ -17,7 +17,7 @@ To access diachronic resources: https://zenodo.org/records/15766757.
 Each reseource lives in its associated folder. 
 
 ## Installation of Lingan
-Lingan makes the use of embeddings and ngrams easy by providing core functions for computational diachronic analysis such embedding alingment. Documentation for the code is not ready right now. Please refer to the Appendix section of our study for the list of defined operations in the library.
+Lingan makes the use of embeddings and ngrams easy by providing core functions for computational diachronic analysis such embedding alingment. Documentation for the code is not ready right now. Please refer to the Appendix section for the list of defined operations in the library.
 Lingan can only be installed by cloning the repository for now. We are planning to upload the codebase to the pypi to support pip installation.
 
 ## Example Usage
