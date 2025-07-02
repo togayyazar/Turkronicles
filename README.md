@@ -7,36 +7,25 @@
 - [Overview](#overview)
 - [Installation](#installation)
 - [Example Usage](#example-usage)
-- [Data](#data)
 - [Citation](#citation)
-- [License](#license)
-
 
 
 ## Overview
 
-This is the repository for code and data repository used in the study Turkronicle:Diachronic Resources for the Fast Evolving Turkish Language. It provides functions and tools to analyze text data organized by time periods, offering modular components for vocabulary statistics, embeddings, and more.
+This repository hosts all code and data used in “Turkronicle: Diachronic Resources for the Fast-Evolving Turkish Language.” Inside, you’ll find decade-separeted corpora (1921-2024), pre-trained static embeddings (PPMI, SVD, CBOW), 1-,2-,3-,4-,and 5-grams with their frequencies. 
+To access diachronic resources: https://zenodo.org/records/15766757.
+Each reseource lives in its associated folder. 
 
-For accessing diachronic resources please see:
-https://zenodo.org/records/15766757
-
-## Installation
-
-The repository can only be installed by cloning for now. We are planning to upload the codebase to the pypi to support pip installation.
-
-### Operation
-
+## Installation of Lingan
+Lingan makes the use of embeddings and ngrams easy by providing core functions for computational diachronic analysis such embedding alingment. Documentation for the code is not ready right now. Please refer to the Appendix section of our study for the list of defined operations in the library.
+Lingan can only be installed by cloning the repository for now. We are planning to upload the codebase to the pypi to support pip installation.
 
 ## Example Usage
 
-Explore `examples/temporal_freq.py` and Jupyter notebooks for step-by-step tutorials.
+Explore `lingan/examples/exps.py` and Jupyter notebooks for step-by-step tutorials.
 
 ## Citation
 
-If you use Lingan in your research, please cite:
+If you use the resources presented in this repository, please cite:
 
 > Kutlu, Mucahid, and İsa Kerem Bayırlı. "Turkronicles: Diachronic Resources for the Fast Evolving Turkish Language." arXiv preprint arXiv:2405.10133 (2024).
-
-## License
-
-This project is released under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license. See `LICENSE` for details.
