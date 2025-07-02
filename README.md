@@ -22,7 +22,7 @@ Lingan can only be installed by cloning the repository for now. We are planning 
 
 ## Example Usage
 
-Explore `lingan/examples/exps.py` and Jupyter notebooks for step-by-step tutorials.
+See `lingan/examples/exps.py`
 
 ## Citation
 
