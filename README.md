@@ -12,7 +12,7 @@
 
 ## Overview
 
-This repository hosts all code and data used in “Turkronicle: Diachronic Resources for the Fast-Evolving Turkish Language.” Inside, you’ll find decade-separeted corpora (1921-2024), pre-trained static embeddings (PPMI, SVD, CBOW), 1-,2-,3-,4-,and 5-grams with their frequencies. 
+This repository hosts all code and data used in “Turkronicle: Diachronic Resources for the Fast-Evolving Turkish Language.” Inside, you’ll find decade-separeted corpora (1921-2024), pre-trained static embeddings (PPMI, SVD, CBOW), 1-,2-,3-,4-,and 5-grams with their frequencies. \
 To access diachronic resources: https://zenodo.org/records/15766757.
 Each reseource lives in its associated folder. 
 
